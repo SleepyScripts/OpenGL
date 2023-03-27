@@ -47,4 +47,5 @@ void Scale(Vector3 *a, float scale) {
 void PrintVector(const Vector3 *a) {
 	printf("(%.3f, %.3f, %.3f)\n", a->x, a->y, a->z);
 }
+
 #endif
