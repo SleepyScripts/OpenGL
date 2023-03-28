@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <window.h>
@@ -27,36 +28,36 @@ int main(int argc, char** argv) {
 
 
 	float vertices[] = {
-		 -0.5f, -0.5f, 0.0f,
-		  0.5f, -0.5f, 0.0f,
-		  0.5f,  0.5f, 0.0f,
-		 -0.5f,  0.5f, 0.0f
+		 -0.5f, -0.5f,  0.5f,
+		  0.5f, -0.5f,  0.5f,
+		  0.5f,  0.5f,  0.5f,
+		 -0.5f,  0.5f,  0.5f,
+		 
+		 -0.5f, -0.5f,  -0.5f,
+		  0.5f, -0.5f,  -0.5f,
+		  0.5f,  0.5f,  -0.5f,
+		 -0.5f,  0.5f,  -0.5f
 	};
 
-	unsigned int indices[] = {0, 1, 2, 0, 2, 3};
+	unsigned int indices[] = {
+		0, 1, 2, 
+		0, 2, 3,	
+
+		4, 5, 6, 
+		4, 6, 7	
+
+	};
 	
-	float uvs[] = {
-		0.0f, 0.0f,
-		1.0f, 0.0f,
-		1.0f, 1.0f,
-		0.0f, 1.0f
-	};
-
 	unsigned int shader = ShaderCreate("shaders/vertex.shader", "shaders/fragment.shader");
-	
-	float *proj = SetCameraOrthoProjectionMatrix(0.0f, (float)width, 0.0f, (float)height, 0.0f, 1.0f);
-	Camera *cam = CameraCreate(width, height, proj);
+
+
+	float *proj1 = CameraSetPerspectiveProjectionMatrix(width, height, 45.0f, 0.0f, 1000.0f);
+	float *proj = SetCameraOrthoProjectionMatrix(0.0f, (float)width, 0.0f, (float)height, 0.0f, 1000.0f);
+	Camera *cam = CameraCreate(width, height, proj1);
 	
 	Object *obj = ObjectCreate(vertices, sizeof(vertices), indices, sizeof(indices)); 
-	ObjectAddAttribute(obj, uvs, sizeof(uvs));
-	ObjectScale(obj, 200.0f, 200.0f, 1.0f);
-	
-	Object *obj1 = ObjectCreate(vertices, sizeof(vertices), indices, sizeof(indices)); 
-	ObjectScale(obj1, 150.0f, 150.0f, 1.0f);
-	
-	Object *obj2 = ObjectCreate(vertices, sizeof(vertices), indices, sizeof(indices)); 
-	ObjectAddAttribute(obj2, uvs, sizeof(uvs));
-	ObjectScale(obj2, 50.0f, 50.0f, 1.0f);
+	ObjectScale(obj, 200.0f, 200.0f, 200.0f);
+
 	
 	while(!glfwWindowShouldClose(window)) {
 		ProcessInput(window);
@@ -64,12 +65,12 @@ int main(int argc, char** argv) {
 		ObjectControl(window, obj, 10.0f);	
 		CameraControl(window, cam, 5.0f);
 		
+		ObjectRotate(obj, glfwGetTime());
+		
 		glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);		
 
-		ObjectRender(obj,  shader, cam);
-		ObjectRender(obj1, shader, cam);
-		ObjectRender(obj2, shader, cam);
+		ObjectRender(obj, shader, cam);
 
     	glfwSwapBuffers(window);
     	glfwPollEvents();    
@@ -77,8 +78,6 @@ int main(int argc, char** argv) {
 
 	glfwTerminate();
 	ObjectDelete(obj);
-	ObjectDelete(obj1);
-	ObjectDelete(obj2);
 
 	return 0;
 }

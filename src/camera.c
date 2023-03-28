@@ -12,6 +12,18 @@ float *SetCameraOrthoProjectionMatrix(float left, float right, float bottom, flo
 	return proj;
 }
 
+float *CameraSetPerspectiveProjectionMatrix(int width, int height, float fovy, float zNear, float zFar) {
+	float *matrix = calloc(16, sizeof(float));
+	float aspect = (float)width / (float)height;
+    float f = 1.0f / tanf(fovy * (float)M_PI / 360.0f);
+    matrix[0] = f / aspect;
+    matrix[5] = f;
+    matrix[10] = (zFar + zNear) / (zNear - zFar);
+    matrix[11] = -1.0f;
+    matrix[14] = (2.0f * zFar * zNear) / (zNear - zFar);
+	return matrix;
+}
+
 float *SetDefaultCameraViewMatrix() {
 	float *view = calloc(16, sizeof(float));
 	view[0]  = 1.0f; 
@@ -45,5 +57,9 @@ void CameraControl(GLFWwindow *window, Camera *cam, float speed) {
         cam->view[12] -= speed;
     if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
         cam->view[12] += speed;	
+    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+        cam->view[14] -= speed;
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+        cam->view[14] += speed;	
 }
 

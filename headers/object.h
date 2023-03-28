@@ -2,6 +2,7 @@
 #define OBJECT_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <vector.h>
@@ -21,6 +22,8 @@ void SetDefaultModelMatrix(Object *obj);
 void ObjectTranslate(Object *obj, Vector3 *position);
 
 void ObjectScale(Object *obj, float x, float y, float z);
+
+void ObjectRotate(Object *obj, float angle);
 
 Object *ObjectCreate(float *vertices, size_t verticesSize, unsigned int *indices, size_t indicesSize);
 

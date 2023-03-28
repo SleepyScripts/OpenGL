@@ -2,6 +2,7 @@
 #define CAMERA_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <vector.h>
@@ -14,6 +15,8 @@ typedef struct {
 } Camera;
 
 float *SetCameraOrthoProjectionMatrix(float left, float right, float bottom, float top, float near, float far);
+
+float *CameraSetPerspectiveProjectionMatrix(int width, int height, float fovy, float zNear, float zFar);
 
 float *SetDefaultCameraViewMatrix();
 

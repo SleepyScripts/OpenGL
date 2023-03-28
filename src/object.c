@@ -20,6 +20,16 @@ void ObjectScale(Object *obj, float x, float y, float z) {
 	obj->model[10] *= z;
 }
 
+void ObjectRotate(Object *obj, float angle) {
+	float c = cos(angle);
+    float s = sin(angle);
+    obj->model[0]  = 200.0f * c;
+    obj->model[2]  = -s * 200.0f;
+    obj->model[5]  = 200.0f;
+    obj->model[8]  = s * 200.0f;
+    obj->model[10] = c * 200.0f;
+}
+
 Object *ObjectCreate(float *vertices, size_t verticesSize, unsigned int *indices, size_t indicesSize) {
 	Object *obj = malloc(sizeof(Object));
 	obj->countAttribute = 0;
