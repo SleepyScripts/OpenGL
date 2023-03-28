@@ -21,7 +21,7 @@ float *SetDefaultCameraViewMatrix() {
 	return view;
 }
 
-Camera *CreateCamera(int width, int height, float *proj) {
+Camera *CameraCreate(int width, int height, float *proj) {
 	Camera *cam = malloc(sizeof(Camera));
 	cam->width  = width;
 	cam->height = height;
@@ -30,14 +30,20 @@ Camera *CreateCamera(int width, int height, float *proj) {
 	return cam;
 }
 
-
-void CameraTranslate(Camera *cam, Vector3 *position, ObjectPool *objectPool) {
+void CameraTranslate(Camera *cam, Vector3 *position) {
 	cam->view[12] = - position->x;
 	cam->view[13] = - position->y;
 	cam->view[14] = - position->z;
-
-	for(int i=0; i<objectPool->objectCount; i++) {
-		glUseProgram(objectPool->array[i]->shaderProgram);	
-		glUniformMatrix4fv(glGetUniformLocation(objectPool->array[i]->shaderProgram, "view"), 1, GL_FALSE, cam->view);
-	}
 }
+
+void CameraControl(GLFWwindow *window, Camera *cam, float speed) {	
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+        cam->view[13] += speed;
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+        cam->view[13] -= speed;
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+        cam->view[12] -= speed;
+    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+        cam->view[12] += speed;	
+}
+

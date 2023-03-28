@@ -6,6 +6,8 @@
 
 const char *ReadShaderFile(const char *source);
 
-unsigned int CreateShaderProgram(const char *vertexFile, const char *fragmentFile);
+unsigned int ShaderCreate(const char *vertexFile, const char *fragmentFile);
+
+void ShaderSetColor(unsigned int shader, float r, float g, float b, float alpha);
 
 #endif

@@ -21,7 +21,7 @@ const char *ReadShaderFile(const char *source){
     return string;
 }
 
-unsigned int CreateShaderProgram(const char *vertexFile, const char *fragmentFile) {
+unsigned int ShaderCreate(const char *vertexFile, const char *fragmentFile) {
 	int ret;
 	char log[512];
 	
@@ -60,4 +60,9 @@ unsigned int CreateShaderProgram(const char *vertexFile, const char *fragmentFil
 	}
 	
 	return shaderProgram;
+}
+
+void ShaderSetColor(unsigned int shader, float r, float g, float b, float alpha) {
+	glUseProgram(shader);
+	glUniform4f(glGetUniformLocation(shader, "color"), r, g, b, alpha);
 }
