@@ -25,4 +25,6 @@ void Scale(Vector3 *a, float scale);
 
 void PrintVector(const Vector3 *a);
 
+void MatrixMul(float *out, float *m1, float *m2);
+
 #endif

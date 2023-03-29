@@ -28,49 +28,57 @@ int main(int argc, char** argv) {
 
 
 	float vertices[] = {
-		 -0.5f, -0.5f,  0.5f,
-		  0.5f, -0.5f,  0.5f,
-		  0.5f,  0.5f,  0.5f,
-		 -0.5f,  0.5f,  0.5f,
-		 
-		 -0.5f, -0.5f,  -0.5f,
-		  0.5f, -0.5f,  -0.5f,
-		  0.5f,  0.5f,  -0.5f,
-		 -0.5f,  0.5f,  -0.5f
+		 -0.5f, -0.5f, -0.5f,
+		  0.5f, -0.5f, -0.5f,
+		  0.5f,  0.5f, -0.5f,
+		 -0.5f,  0.5f, -0.5f
 	};
 
 	unsigned int indices[] = {
 		0, 1, 2, 
 		0, 2, 3,	
+	};
 
-		4, 5, 6, 
-		4, 6, 7	
-
+	float uvs[] = {
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+		0.0f, 1.0f,
 	};
 	
 	unsigned int shader = ShaderCreate("shaders/vertex.shader", "shaders/fragment.shader");
 
 
-	float *proj1 = CameraSetPerspectiveProjectionMatrix(width, height, 45.0f, 0.0f, 1000.0f);
-	float *proj = SetCameraOrthoProjectionMatrix(0.0f, (float)width, 0.0f, (float)height, 0.0f, 1000.0f);
-	Camera *cam = CameraCreate(width, height, proj1);
+	float *proj = SetCameraOrthoProjectionMatrix(0, (float)width, 0, (float)height, 0, 1000.0f);
+	//float *proj = CameraSetPerspectiveProjectionMatrix(width, height, 45.0f, 0.0f, 1000.0f);
+	Camera *cam = CameraCreate(width, height, proj);
 	
 	Object *obj = ObjectCreate(vertices, sizeof(vertices), indices, sizeof(indices)); 
-	ObjectScale(obj, 200.0f, 200.0f, 200.0f);
-
+	ObjectAddAttribute(obj, uvs, sizeof(uvs));
+	ObjectSetScale(obj, 100.0f, 100.0f, 100.0f);
+	
+	Object *obj1 = ObjectCreate(vertices, sizeof(vertices), indices, sizeof(indices)); 
+	ObjectAddAttribute(obj1, uvs, sizeof(uvs));
+	ObjectSetScale(obj1, 50.0f, 50.0f, 50.0f);
+	ObjectSetPosition(obj1, 0, 0, 200.0f);
+	
+	
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 	
 	while(!glfwWindowShouldClose(window)) {
 		ProcessInput(window);
 			
 		ObjectControl(window, obj, 10.0f);	
 		CameraControl(window, cam, 5.0f);
+				
+		ObjectSetRotation(obj, 0, glfwGetTime(), 0);
 		
-		ObjectRotate(obj, glfwGetTime());
-		
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);		
 
 		ObjectRender(obj, shader, cam);
+		ObjectRender(obj1, shader, cam);
 
     	glfwSwapBuffers(window);
     	glfwPollEvents();    

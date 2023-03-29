@@ -10,26 +10,25 @@
 
 typedef struct {
 	unsigned int bufferLayout;
-
 	unsigned int countAttribute;
 	unsigned int countIndices;
 
-	float *model;
+	Vector3 position;
+	Vector3 scale;
+	Vector3 rotation;
 } Object;
-
-void SetDefaultModelMatrix(Object *obj);
-
-void ObjectTranslate(Object *obj, Vector3 *position);
-
-void ObjectScale(Object *obj, float x, float y, float z);
-
-void ObjectRotate(Object *obj, float angle);
 
 Object *ObjectCreate(float *vertices, size_t verticesSize, unsigned int *indices, size_t indicesSize);
 
 void ObjectAddAttribute(Object *obj, float *uvs, size_t uvsSize);
 
 void ObjectDelete(Object *obj);
+
+void ObjectSetPosition(Object *obj, float x, float y, float z);
+
+void ObjectSetScale(Object *obj, float x, float y, float z);
+
+void ObjectSetRotation(Object *obj, float x, float y, float z);
 
 void ObjectControl(GLFWwindow *window, Object *obj, float speed);
 

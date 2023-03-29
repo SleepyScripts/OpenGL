@@ -19,7 +19,7 @@ float *CameraSetPerspectiveProjectionMatrix(int width, int height, float fovy, f
     matrix[0] = f / aspect;
     matrix[5] = f;
     matrix[10] = (zFar + zNear) / (zNear - zFar);
-    matrix[11] = -1.0f;
+    matrix[11] = 1.0f; // ?
     matrix[14] = (2.0f * zFar * zNear) / (zNear - zFar);
 	return matrix;
 }
