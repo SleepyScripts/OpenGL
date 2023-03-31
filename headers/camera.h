@@ -3,27 +3,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <GL/glew.h>
+#include <cglm/cglm.h>
 #include <GLFW/glfw3.h>
-#include <vector.h>
 
-typedef struct {
-	float *proj;
-	float *view;
-	int width;
-	int height;	
+typedef struct{
+	mat4 proj;
+	mat4 view;
 } Camera;
 
-float *SetCameraOrthoProjectionMatrix(float left, float right, float bottom, float top, float near, float far);
+void CameraCreate(Camera *cam, vec3 pos, int width, int height, int type);
 
-float *CameraSetPerspectiveProjectionMatrix(int width, int height, float fovy, float zNear, float zFar);
-
-float *SetDefaultCameraViewMatrix();
-
-Camera *CameraCreate(int width, int height, float *proj);
-
-void CameraTranslate(Camera *cam, Vector3 *position);
+void CameraTranslate(Camera *cam, vec3 pos);
 
 void CameraControl(GLFWwindow *window, Camera *cam, float speed);
-	
+
 #endif
