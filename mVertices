@@ -1,2 +1,0 @@
-You entered: What date type is mesh- ins assimp library? 
-As an AI file format, mesh data in Assimp library is typically stored as an object of the aiMesh class, which contains a variety of structural and numerical data types such as arrays of vertices, normals, and texture coordinates, as well as integers and flags that define the topology and properties of the mesh. However, the specific data type used by Assimp to represent meshes may depend on the source format and any customizations or conversions applied during import.
