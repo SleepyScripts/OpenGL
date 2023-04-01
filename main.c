@@ -6,6 +6,7 @@
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <stb_image.h>
 
 #include <window.h>
 #include <shader.h>
@@ -26,6 +27,7 @@ typedef struct {
 	float *uvs;
 	unsigned int *indices;
 	
+	unsigned int texture;
 	unsigned int numVertices;
 	unsigned int numTriangles;
 } Mesh;
@@ -51,6 +53,11 @@ void ObjectImportModel(Object *obj, const char *name) {
 	    exit(1);
 	}
 
+	unsigned int test = scene->mMeshes[0]->mNumBones;
+	printf("Mesh has %d bones!\n", test);
+     
+
+	
 	obj->numMeshes = scene->mNumMeshes;
 	obj->meshes = malloc(sizeof(Mesh) * obj->numMeshes);
 	for(int currentMesh = 0; currentMesh < obj->numMeshes; currentMesh++) {
@@ -58,16 +65,23 @@ void ObjectImportModel(Object *obj, const char *name) {
 		
 		mesh->numVertices  = scene->mMeshes[currentMesh]->mNumVertices;
 		mesh->numTriangles = scene->mMeshes[currentMesh]->mNumFaces;
-		
+	
+
+	
 		mesh->vertices = malloc(sizeof(float) * 3 * mesh->numVertices);
 		mesh->normals  = malloc(sizeof(float) * 3 * mesh->numVertices);
 		mesh->uvs      = malloc(sizeof(float) * 2 * mesh->numVertices);
 		mesh->indices  = malloc(sizeof(unsigned int) * 3 * mesh->numTriangles);
 
 
-		memcpy(mesh->vertices, scene->mMeshes[currentMesh]->mVertices,          sizeof(float) * 3 * mesh->numVertices);
-		memcpy(mesh->normals,  scene->mMeshes[currentMesh]->mNormals,           sizeof(float) * 3 * mesh->numVertices);
-		memcpy(mesh->uvs,      scene->mMeshes[currentMesh]->mFaces[0].mIndices, sizeof(float) * 2 * mesh->numVertices);
+		memcpy(mesh->vertices, scene->mMeshes[currentMesh]->mVertices,         sizeof(float) * 3 * mesh->numVertices);
+		memcpy(mesh->normals,  scene->mMeshes[currentMesh]->mNormals,          sizeof(float) * 3 * mesh->numVertices);
+
+		int counter = 0;
+		for(unsigned int i = 0; i <scene->mMeshes[currentMesh]->mNumVertices; i++) {
+			mesh->uvs[counter++] = scene->mMeshes[currentMesh]->mTextureCoords[0][i].x;
+			mesh->uvs[counter++] = scene->mMeshes[currentMesh]->mTextureCoords[0][i].y;
+		}
 
 		for (unsigned int i = 0; i < scene->mMeshes[currentMesh]->mNumFaces; i++) {
 	    	struct aiFace face = scene->mMeshes[currentMesh]->mFaces[i];
@@ -132,8 +146,13 @@ void ObjectRender(Object *obj, Camera *camera) {
 	glUniformMatrix4fv(glGetUniformLocation(obj->shader, "model"), 1, GL_FALSE, obj->model[0]);
 	glUniformMatrix4fv(glGetUniformLocation(obj->shader, "view" ), 1, GL_FALSE, camera->view[0]);
 	glUniformMatrix4fv(glGetUniformLocation(obj->shader, "proj" ), 1, GL_FALSE, camera->proj[0]);
+	
+	glUniform1i(glGetUniformLocation(obj->shader, "texture0"), 0);
 
 	for(int m=0; m<obj->numMeshes; m++) {	
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, obj->meshes[m].texture);
+		
 		glBindVertexArray(obj->layout[m]);
 		glDrawElements(GL_TRIANGLES, obj->meshes[m].numTriangles * 3, GL_UNSIGNED_INT, 0);
 	}
@@ -173,6 +192,29 @@ void ObjectSetLayout(Object *obj) {
 		glBindVertexArray(0);
 	}
 }
+
+void ObjectSetTexture(Object *obj, int meshNumber, const char *name) {
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int texWidth, texHeight, texChannels;
+	//stbi_set_flip_vertically_on_load(1);
+	unsigned char *data = stbi_load(name, &texWidth, &texHeight, &texChannels, 0);	
+	if(!data) fprintf(stderr, "Failed to load texture!\n");
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	stbi_image_free(data);	
+	obj->meshes[meshNumber].texture = texture;
+}
+
+
 	
 int main(int argc, char** argv) {	
 	int width = 800, height = 600;
@@ -188,17 +230,22 @@ int main(int argc, char** argv) {
 	Camera camera; 
 	CameraCreate(&camera, pos, width, height, 0);	
 	vec3 position = {0.0f, 0.0f, 0.0f};
-	vec3 rotation = {-90.0f, 0.0f, 0.0f};
+	vec3 rotation = {0.0f, 0.0f, 0.0f};
 	vec3 scale = {10.0f, 10.0f, 10.0f};
 	
 	Object obj;
 	ObjectCreate(&obj, position, rotation, scale);
  	ObjectGetModelMatrix(&obj);
-	ObjectImportModel(&obj, "models/dragon.obj");
+	ObjectImportModel(&obj, "models/Zone/model.fbx");
 	obj.shader =  ShaderCreate("shaders/vertex.shader", "shaders/fragment.shader");	
  	ObjectSetLayout(&obj);
 
-	
+	ObjectSetTexture(&obj, 0, "models/Zone/hair_col.png");
+	ObjectSetTexture(&obj, 1, "models/Zone/face_col.png");
+	ObjectSetTexture(&obj, 2, "models/Zone/upper_col.png");
+	ObjectSetTexture(&obj, 3, "models/Zone/upper_col.png");
+	ObjectSetTexture(&obj, 4, "models/Zone/lower_col.png");
+
 	glEnable(GL_DEPTH_TEST);	
 	vec3 X = {1.0f, 0.0f, 0.0f};
 	vec3 Y = {0.0f, 1.0f, 0.0f};
@@ -210,7 +257,7 @@ int main(int argc, char** argv) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 		
-		glm_rotate(obj.model, glm_rad(1.0f), Z); 
+		//glm_rotate(obj.model, glm_rad(1.0f), Y); 
 		ObjectRender(&obj, &camera);
 	
     	glfwSwapBuffers(window);
